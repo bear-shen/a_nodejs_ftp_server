@@ -1,4 +1,7 @@
 import {DropArgument, Socket} from "net";
+import {SessionDef} from "./types";
+import Route from "./Route";
+import SessionStore from "./SessionStore";
 
 const net = require("node:net");
 
@@ -23,6 +26,7 @@ const conf = {
         _226: '226 Operation successful.\r\n',
         _250: '250 CWD command successful.\r\n',
         _550: '550 Permission denied.\r\n',
+        _504: '504 Command not implemented for that parameter.\r\n',
     } as { [key: string]: string },
 };
 
@@ -38,16 +42,28 @@ server.on('error', async (err: Error) => {
 });
 server.on('connection', async (socket: Socket) => {
     console.info('server:connection');
+    const session=SessionStore.build(socket);
     socket.write(buildTemplate(220));
     socket.on("close", async (hadError: boolean) => {
         console.info('socket:close');
+        SessionStore.delete(session.id);
     });
     socket.on("connect", async () => {
         console.info('socket:connect');
     });
-    socket.on("data", async (data: Buffer) => {
+    socket.on("data", async (buffer: Buffer) => {
         console.info('socket:data');
-        console.info(data.toString());
+        // console.info(data.toString());
+        let methodName = '';
+        for (let i = 0; i < 5; i++) {
+            let char = buffer.readInt8(i);
+            if (char == 32) break;
+            methodName += String.fromCharCode(char);
+        }
+        if (!Route[methodName]) {
+            session.socket.write(buildTemplate(504));
+        }
+        Route[methodName](session, buffer);
     });
     socket.on("drain", async () => {
         console.info('socket:drain');
@@ -78,32 +94,9 @@ server.on('listening', async () => {
     console.info('server:listening');
 });
 
-function requestMethod(socket: Socket, buffer: Buffer) {
-    let methodName = '';
-    for (let i = 0; i < 5; i++) {
-        let char = buffer.readInt8(i);
-        if (char == 32) break;
-        methodName += String.fromCharCode(char);
-    }
-    switch (methodName) {
-        default:
-            break;
-        case 'USER':
-            break;
-        case 'USER':
-            break;
-        case 'USER':
-            break;
-        case 'USER':
-            break;
-        case 'USER':
-            break;
-        case 'USER':
-            break;
-        case 'USER':
-            break;
-    }
+function requestMethod(session: SessionDef, buffer: Buffer) {
 }
+
 
 function buildTemplate(code: number, ...param: (string | number)[]) {
     const key = '_' + code;

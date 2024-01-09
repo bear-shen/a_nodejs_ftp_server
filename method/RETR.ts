@@ -1,4 +1,4 @@
-import {Socket} from "net";
+import {SessionDef} from "../types";
 
-export default function execute(socket: Socket, buffer: Buffer) {
+export default function execute(session: SessionDef, buffer: Buffer) {
 }
