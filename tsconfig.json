@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+	"module": "Node16",
+	"target": "ESNext",
+	"noImplicitAny": true,
+	"removeComments": true,
+	"preserveConstEnums": true,
+	"sourceMap": true,
+	"outDir": "dst/"
+  },
+  "include": ["*", "**/*",],
+  "exclude": [
+	"node_modules",
+	"**/*.spec.ts",
+	"zzz",
+	"zzz/*",
+	"**/zzz/*",
+	"../share/archive",
+	"archive",
+	"archive/*",
+	"archive/**/*"
+  ]
+}

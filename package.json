@@ -1,0 +1,18 @@
+{
+  "name"        : "a_ftp_server",
+  "version"     : "1.0.0",
+  "description" : "",
+  "main"        : "conf.js",
+  "scripts"     : {
+	"serve": "tsc && node ./dst/index.js --max_old_space_size=16384 --max-new-space-size=16384",
+	"dev"  : "tsc && node ./dst/dev.js --max_old_space_size=16384 --max-new-space-size=16384"
+  },
+  "author"      : "",
+  "license"     : "ISC",
+  "dependencies": {
+	"@types/node"   : "^20.10.6",
+	"@types/Promise": "npm:@types/promise@^7.1.30",
+	"npm"           : "^10.2.5",
+	"Promise"       : "npm:promise@^8.1.0"
+  }
+}
