@@ -16,6 +16,7 @@ export default {
             id: idKey,
             user: '',
             pass: '',
+            login: false,
             socket: socket,
             time: (new Date()).valueOf(),
             passivePort: new Set<number>(),

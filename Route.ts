@@ -1,6 +1,6 @@
 import {SessionDef} from "./types";
 
-const route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
+const Route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     USER: require('method/USER'),
     PASS: require('method/PASS'),
     ACCT: require('method/ACCT'),
@@ -9,6 +9,7 @@ const route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     MODE: require('method/MODE'),
     CWD: require('method/CWD'),
     PWD: require('method/PWD'),
+    XPWD: require('method/PWD'),
     CDUP: require('method/CDUP'),
     PASV: require('method/PASV'),
     RETR: require('method/RETR'),
@@ -32,4 +33,4 @@ const route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     RNTO: require('method/RNTO'),
 };
 
-export default route;
+export default Route;
