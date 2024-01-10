@@ -1,7 +1,7 @@
 import {SessionDef} from "./types";
 import Config from "./Config";
 
-function login(session: SessionDef) {
+async function login(session: SessionDef) {
     const name = session.user;
     const pass = session.pass;
     let matchUn = false;
@@ -12,12 +12,14 @@ function login(session: SessionDef) {
         if (account.password != pass) return;
         matchPw = true;
     });
+    // return matchUn && matchPw;
     if (matchUn && matchPw) {
         session.socket.write(buildTemplate(230));
         session.login = true;
         return;
     }
-    session.socket.write(buildTemplate(430))
+    session.socket.write(buildTemplate(430));
+    return session.login;
 }
 
 

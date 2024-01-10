@@ -32,15 +32,18 @@ server.on('connection', async (socket: Socket) => {
         console.info('socket:data');
         // console.info(data.toString());
         let methodName = '';
+        let st = 0;
         for (let i = 0; i < 5; i++) {
             let char = buffer.readInt8(i);
+            st = i;
             if (char == 32) break;
             methodName += String.fromCharCode(char);
         }
         if (!Route[methodName]) {
             session.socket.write(buildTemplate(504));
         }
-        Route[methodName](session, buffer);
+        const sBuffer = buffer.subarray(st + 1);
+        Route[methodName](session, sBuffer);
     });
     socket.on("drain", async () => {
         console.info('socket:drain');
