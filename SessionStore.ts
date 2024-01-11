@@ -18,8 +18,9 @@ export default {
             pass: '',
             login: false,
             socket: socket,
+            mode: 'I',
             time: (new Date()).valueOf(),
-            passivePort: new Set<number>(),
+            passive: null,
             curPath: '/',
             curNode: 0,
         };

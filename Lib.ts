@@ -1,5 +1,10 @@
 import {SessionDef} from "./types";
 import Config from "./Config";
+import {Server, Socket} from "net";
+import SessionStore from "./SessionStore";
+import Promise = require("Promise");
+
+const net = require("node:net");
 
 async function login(session: SessionDef) {
     const name = session.user;
@@ -14,11 +19,8 @@ async function login(session: SessionDef) {
     });
     // return matchUn && matchPw;
     if (matchUn && matchPw) {
-        session.socket.write(buildTemplate(230));
         session.login = true;
-        return;
     }
-    session.socket.write(buildTemplate(430));
     return session.login;
 }
 
@@ -34,6 +36,7 @@ function buildTemplate(code: number, ...param: (string | number)[]) {
     param.forEach((p, i) => s = s.replace('{' + i + '}', p.toString()));
     return s;
 }
+
 
 export {
     login,

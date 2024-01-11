@@ -4,7 +4,7 @@ const Route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     USER: require('method/USER'),
     PASS: require('method/PASS'),
     // ACCT: require('method/ACCT'),
-    // TYPE: require('method/TYPE'),
+    TYPE: require('method/TYPE'),
     // STRU: require('method/STRU'),
     // MODE: require('method/MODE'),
     // CWD: require('method/CWD'),

@@ -1,7 +1,12 @@
 import {SessionDef} from "../types";
-import {login} from "../Lib";
+import {buildTemplate, login} from "../Lib";
 
 export default async function execute(session: SessionDef, buffer: Buffer) {
     session.pass = buffer.toString();
-    await login(session);
+    const ifSuccess = await login(session);
+    if(ifSuccess){
+        session.socket.write(buildTemplate(230));
+    }else{
+        session.socket.write(buildTemplate(430));
+    }
 }

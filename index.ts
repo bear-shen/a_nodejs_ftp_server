@@ -1,4 +1,4 @@
-import {DropArgument, Socket} from "net";
+import {DropArgument, Server, Socket} from "net";
 import {SessionDef} from "./types";
 import Route from "./Route";
 import SessionStore from "./SessionStore";
@@ -8,7 +8,7 @@ import {buildTemplate} from "./Lib";
 const net = require("node:net");
 
 
-const server = net.createServer({}, async (socket: Socket) => {
+const server: Server = net.createServer({}, async (socket: Socket) => {
     console.info('server:createServer');
 });
 server.listen(Config.port, Config.host, async () => {
@@ -17,6 +17,15 @@ server.listen(Config.port, Config.host, async () => {
 server.on('error', async (err: Error) => {
     console.info('server:error', err);
 });
+/**
+ * socket:
+ * ready -> connect -> data
+ * drain
+ * error
+ * lookup
+ * timeout
+ * end -> close
+ * */
 server.on('connection', async (socket: Socket) => {
     console.info('server:connection');
     const session = SessionStore.build(socket);
@@ -44,24 +53,6 @@ server.on('connection', async (socket: Socket) => {
         }
         const sBuffer = buffer.subarray(st + 1);
         Route[methodName](session, sBuffer);
-    });
-    socket.on("drain", async () => {
-        console.info('socket:drain');
-    });
-    socket.on("end", async () => {
-        console.info('socket:end');
-    });
-    socket.on("error", async (err: Error) => {
-        console.info('socket:error');
-    });
-    socket.on("lookup", async (err: Error, address: string, family: string | number, host: string) => {
-        console.info('socket:lookup');
-    });
-    socket.on("ready", async () => {
-        console.info('socket:ready');
-    });
-    socket.on("timeout", async (err: Error) => {
-        console.info('socket:timeout');
     });
 });
 server.on('drop', async (data?: DropArgument) => {

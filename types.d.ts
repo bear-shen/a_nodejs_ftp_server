@@ -1,4 +1,4 @@
-import {Socket} from "net";
+import {Server, Socket} from "net";
 
 type SessionDef = {
     id: number,
@@ -7,7 +7,14 @@ type SessionDef = {
     login: boolean,
     socket: Socket,
     time: number,
-    passivePort: Set<number>,
+    mode: 'I' | 'A' | 'AN' | 'L8' | string,
+    //多线程上传和下载是用多个session实现的,这边不需要set
+    // passivePort: Set<number>,
+    passive: {
+        port: number,
+        server: Server,
+        socket?: Socket,
+    } | null,
     curPath: string,
     curNode: number,
 };
