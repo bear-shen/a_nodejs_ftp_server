@@ -22,7 +22,7 @@ export default {
             time: (new Date()).valueOf(),
             passive: null,
             curPath: '/',
-            curNode: 0,
+            // curNode: 0,
         };
         sessionStore.set(idKey, session);
         return session;

@@ -16,5 +16,5 @@ type SessionDef = {
         socket?: Socket,
     } | null,
     curPath: string,
-    curNode: number,
+    // curNode: number,
 };

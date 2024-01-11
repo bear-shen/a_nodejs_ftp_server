@@ -21,6 +21,7 @@ const Config = {
         _250: '250 CWD command successful.\r\n',
         _550: '550 Permission denied.\r\n',
         _504: '504 Command not implemented for that parameter.\r\n',
+        _425: 'Can\'t open data connection.\n\r\n',
     } as { [key: string]: string },
 };
 

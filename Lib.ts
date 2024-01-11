@@ -1,8 +1,5 @@
 import {SessionDef} from "./types";
 import Config from "./Config";
-import {Server, Socket} from "net";
-import SessionStore from "./SessionStore";
-import Promise = require("Promise");
 
 const net = require("node:net");
 
@@ -37,8 +34,35 @@ function buildTemplate(code: number, ...param: (string | number)[]) {
     return s;
 }
 
+function ltrimSlash(str: string) {
+    if (str.indexOf('/') !== 0) return str;
+    return str.substring(1, str.length);
+}
+
+function rtrimSlash(str: string) {
+    if (str.lastIndexOf('/') !== str.length - 1) return str;
+    return str.substring(0, str.length - 1);
+}
+
+function dirname(str: string) {
+    str = rtrimSlash(str);
+    let offset = str.lastIndexOf('/');
+    if (offset === 0 || offset === -1) return str;
+    return str.substring(0, offset);
+}
+
+function basename(str: string) {
+    str = rtrimSlash(str);
+    let offset = str.lastIndexOf('/');
+    if (offset === 0 || offset === -1) return str;
+    return str.substring(offset + 1, str.length);
+}
 
 export {
     login,
     buildTemplate,
+    ltrimSlash,
+    rtrimSlash,
+    dirname,
+    basename,
 };
