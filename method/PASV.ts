@@ -4,10 +4,10 @@ import Config from "../Config";
 import {Server, Socket} from "net";
 import net from "node:net";
 
-export default async function execute(session: SessionDef, buffer: Buffer) {
+export async function execute(session: SessionDef, buffer: Buffer) {
     await createPasvServer(session);
     let pasvParam = [
-        Config.host.replace('.', ','),
+        session.socket.localAddress.replace(/\./g, ','),
         Math.floor(session.passive.port / 256),
         session.passive.port % 256
     ];

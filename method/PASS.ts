@@ -1,7 +1,7 @@
 import {SessionDef} from "../types";
 import {buildTemplate, login} from "../Lib";
 
-export default async function execute(session: SessionDef, buffer: Buffer) {
+export async function execute(session: SessionDef, buffer: Buffer) {
     session.pass = buffer.toString();
     const ifSuccess = await login(session);
     if(ifSuccess){

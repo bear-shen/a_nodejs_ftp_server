@@ -45,13 +45,16 @@ server.on('connection', async (socket: Socket) => {
         for (let i = 0; i < 5; i++) {
             let char = buffer.readInt8(i);
             st = i;
-            if (char == 32) break;
+            if (char == 32 || char == 0x0d || char == 0x0a) break;
             methodName += String.fromCharCode(char);
         }
+        console.info(methodName);
         if (!Route[methodName]) {
             session.socket.write(buildTemplate(504));
+            return;
         }
-        const sBuffer = buffer.subarray(st + 1);
+        // console.info(methodName, methodName.length);
+        const sBuffer = buffer.subarray(methodName.length + 1, buffer.length - 2);
         Route[methodName](session, sBuffer);
     });
 });

@@ -1,5 +1,5 @@
 import {SessionDef} from "../types";
-import {buildTemplate, dirname, ltrimSlash, rtrimSlash} from "../Lib";
+import {basename, buildTemplate, dirname, ltrimSlash, rtrimSlash} from "../Lib";
 import * as fs from "node:fs/promises";
 import {Stats} from "fs";
 
@@ -14,9 +14,9 @@ type fType = {
     size?: number,
     modify: string,
     perm: string,
-    name: string,
+    // name: string,
 };
-export default async function execute(session: SessionDef, buffer: Buffer) {
+export async function execute(session: SessionDef, buffer: Buffer) {
     if (!session.passive)
         return session.socket.write(buildTemplate(425));
     let withCDir = false;
@@ -37,23 +37,40 @@ export default async function execute(session: SessionDef, buffer: Buffer) {
         return session.socket.write(buildTemplate(451));
     }
     //
-    let targetLs: fType[] = [];
+    let targetLs: [string, fType][] = [];
     //
     const cDir = await fs.stat(curPath);
+    targetLs.push([basename(curPath), stat2FType(cDir, 'c')]);
     let pPath = dirname(curPath);
     if (pPath.length) {
         const pDir = await fs.stat(pPath);
+        targetLs.push([basename(pPath), stat2FType(pDir, 'p')]);
     }
     //
     const ls = await fs.readdir(curPath);
+    for (let i = 0; i < ls.length; i++) {
+        const f = ls[i];
+        const fPath = curPath + f;
+        const fStat = await fs.stat(fPath);
+        targetLs.push([f, stat2FType(fStat)]);
+    }
+    targetLs.forEach(f => {
+        session.passive.socket.write(fType2Str(f[0], f[1]));
+    })
     return session.socket.write(buildTemplate(226));
 }
 
-function fType2Str(fType: fType) {
-
+function fType2Str(fName: string, fType: fType) {
+    let str = '';
+    for (const code in fType) {
+        const val = fType[code as keyof fType];
+        str += code + '=' + val + ';';
+    }
+    str += ' ' + fName;
+    return str;
 }
 
-function stat2FType(stat: Stats, fileName: string, dirMode?: 'c' | 'p'): fType | null {
+function stat2FType(stat: Stats, dirMode?: 'c' | 'p'): fType | null {
     let timeArr: (number | string)[] = [
         stat.mtime.getUTCFullYear(),
         stat.mtime.getUTCMonth() + 1,
@@ -69,19 +86,35 @@ function stat2FType(stat: Stats, fileName: string, dirMode?: 'c' | 'p'): fType |
             '0' + ss : ss
     })
     if (stat.isFile()) {
+        /**
+         * a    APPE    追加+创建
+         * d    DELE    删除
+         * f    RNFR    重命名
+         * r    RETR    下载
+         * w    STOR    续传
+         * */
         let permStr = 'rf';
         return {
             type: 'file',
             size: stat.size,
             modify: timeStr,
-            perm: 'rf',
-            name: fileName,
+            perm: 'dfr',
+            // name: fileName,
         }
     } else if (stat.isDirectory()) {
         let permStr = '';
+        /**
+         * c    STOU STOR AAPE RNTE 可创建
+         * d    DELE    删除
+         * e    CWD CDUP    定位
+         * f    RNFR    重命名
+         * l    LIST NLST MLSD  列表
+         * m    MKD 创建文件夹
+         * p    RMD 删除文件夹
+         * */
         switch (dirMode) {
             default:
-                permStr = 'cmpelf';
+                permStr = 'eflm';
                 break;
             case 'c':
                 permStr = 'el';
@@ -94,7 +127,7 @@ function stat2FType(stat: Stats, fileName: string, dirMode?: 'c' | 'p'): fType |
             type: 'dir',
             modify: timeStr,
             perm: permStr,
-            name: fileName,
+            // name: fileName,
         }
     } else {
         return null;

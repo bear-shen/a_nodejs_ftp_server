@@ -8,6 +8,8 @@ async function login(session: SessionDef) {
     const pass = session.pass;
     let matchUn = false;
     let matchPw = false;
+    console.info(name, pass);
+    console.info(Config.account);
     Config.account.forEach(account => {
         if (account.name != name) return;
         matchUn = true;
