@@ -1,4 +1,5 @@
 PASV建立以后filezilla无法连接，原因不明
+    怀疑是wsl的问题，先做别的吧
 可能是上面衍生的问题，PASV建立server以后无法判断socket有没有建立
 
 ```text
