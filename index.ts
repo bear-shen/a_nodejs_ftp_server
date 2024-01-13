@@ -29,6 +29,7 @@ server.on('error', async (err: Error) => {
 server.on('connection', async (socket: Socket) => {
     console.info('server:connection');
     const session = SessionStore.build(socket);
+    // socket.setEncoding('utf-8');
     socket.write(buildTemplate(220));
     socket.on("close", async (hadError: boolean) => {
         console.info('socket:close');
@@ -39,9 +40,15 @@ server.on('connection', async (socket: Socket) => {
     });
     socket.on("data", async (buffer: Buffer) => {
         console.info('socket:data');
+        if (typeof buffer == 'string') {
+            buffer = Buffer.from(buffer);
+        }
         // console.info(data.toString());
         let methodName = '';
         let st = 0;
+        // console.info(buffer.toString());
+        // console.info(typeof buffer);
+        // console.info(buffer.length);
         for (let i = 0; i < 5; i++) {
             let char = buffer.readInt8(i);
             st = i;

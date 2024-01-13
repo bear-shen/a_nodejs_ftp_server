@@ -3,13 +3,13 @@ const Config = {
     account: [
         {name: 'loli', password: 'con'},
     ],
-    port: 21,
+    port: 25,
     host: '0.0.0.0',
-    pasv_min: 10000,
-    pasv_max: 50000,
+    pasv_min: 21000,
+    pasv_max: 22000,
     messageTemplate: {
         //https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes
-        _220: '220-A FTP Server\r\n220 WELCOME\r\n',
+        _220: '220 A FTP Server\r\n',
         _331: '331 Please, specify the password.\r\n',
         _430: '430 invalid username or password.\r\n',
         _230: '230 Login successful.\r\n',
@@ -21,7 +21,7 @@ const Config = {
         _250: '250 CWD command successful.\r\n',
         _550: '550 Permission denied.\r\n',
         _504: '504 Command not implemented for that parameter.\r\n',
-        _425: 'Can\'t open data connection.\n\r\n',
+        _425: '425 Can\'t open data connection.\r\n',
     } as { [key: string]: string },
 };
 

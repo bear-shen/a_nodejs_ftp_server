@@ -1,9 +1,26 @@
 import {SessionDef} from "../types";
-import {buildTemplate} from "../Lib";
+import {buildTemplate, createPasvServer} from "../Lib";
 import Config from "../Config";
 import {Server, Socket} from "net";
 import net from "node:net";
 
+/**
+ * 5:32:47    响应:    227 Entering Passive Mode (172,22,112,1,82,8)
+ * 15:32:47    追踪:    CFtpRawTransferOpData::ParseResponse() in state 2
+ * 15:32:47    追踪:    CControlSocket::SendNextCommand()
+ * 15:32:47    追踪:    CFtpRawTransferOpData::Send() in state 4
+ * 15:32:47    追踪:    Destination IP of data connection does not match peer IP of control connection. Not binding source address of data connection.
+ * 15:32:47    命令:    LIST
+ * 15:32:49    错误:    无法建立数据连接: ECONNREFUSED - 连接被服务器拒绝
+ *
+ * 15:33:13    响应:    227 Entering Passive Mode (172,22,120,170,82,8)
+ * 15:33:13    追踪:    CFtpRawTransferOpData::ParseResponse() in state 2
+ * 15:33:13    追踪:    CControlSocket::SendNextCommand()
+ * 15:33:13    追踪:    CFtpRawTransferOpData::Send() in state 4
+ * 15:33:13    追踪:    Binding data connection source IP to control connection source IP 127.0.0.1
+ * 15:33:13    命令:    LIST
+ * 15:33:13    错误:    无法建立数据连接: ENETUNREACH - 无法连接网络
+ * */
 export async function execute(session: SessionDef, buffer: Buffer) {
     await createPasvServer(session);
     let pasvParam = [
@@ -12,46 +29,4 @@ export async function execute(session: SessionDef, buffer: Buffer) {
         session.passive.port % 256
     ];
     session.socket.write(buildTemplate(227, pasvParam.join(',')));
-}
-
-const pasvPortSet = new Set<number>;
-
-function createPasvServer(session: SessionDef) {
-    return new Promise<any>((resolve, reject) => {
-        if (session.passive) session.passive.server.close();
-        let validPort = 0;
-        for (let i = Config.pasv_min; i <= Config.pasv_max; i++) {
-            if (pasvPortSet.has(i)) continue;
-            validPort = i;
-            break;
-        }
-        const server: Server = net.createServer({}, async (socket: Socket) => {
-            console.info('PASV:server.createServer', validPort);
-        });
-        session.passive = {
-            port: validPort,
-            server: server,
-        };
-        server.listen(validPort, Config.host, async () => {
-            console.info('PASV:server.listeningListener', validPort);
-            resolve(true);
-        });
-        server.on('connection', async (socket: Socket) => {
-            console.info('PASV:server.connection');
-            session.passive.socket = socket;
-            socket.on("close", async (hadError: boolean) => {
-                console.info('PASV:socket:close');
-                session.passive.server.close((err) => {
-                    pasvPortSet.delete(session.passive.port);
-                    session.passive = null;
-                });
-            });
-            socket.on("connect", async () => {
-                console.info('PASV:socket:connect');
-            });
-            socket.on("data", async (buffer: Buffer) => {
-                console.info('PASV:socket:data');
-            });
-        });
-    });
 }

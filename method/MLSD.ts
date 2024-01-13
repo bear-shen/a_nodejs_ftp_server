@@ -1,5 +1,5 @@
 import {SessionDef} from "../types";
-import {basename, buildTemplate, dirname, ltrimSlash, rtrimSlash} from "../Lib";
+import {basename, buildTemplate, dirname, ltrimSlash, rtrimSlash, syncWritePassive} from "../Lib";
 import * as fs from "node:fs/promises";
 import {Stats} from "fs";
 
@@ -16,7 +16,10 @@ type fType = {
     perm: string,
     // name: string,
 };
+
 export async function execute(session: SessionDef, buffer: Buffer) {
+    console.info(session);
+    return;
     if (!session.passive)
         return session.socket.write(buildTemplate(425));
     let withCDir = false;
@@ -54,11 +57,14 @@ export async function execute(session: SessionDef, buffer: Buffer) {
         const fStat = await fs.stat(fPath);
         targetLs.push([f, stat2FType(fStat)]);
     }
-    targetLs.forEach(f => {
-        session.passive.socket.write(fType2Str(f[0], f[1]));
-    })
+    for (let i = 0; i < targetLs.length; i++) {
+        const f = targetLs[i];
+        // session.passive.socket.uncork()
+        await syncWritePassive(session.passive.socket, fType2Str(f[0], f[1]) + "\r\n");
+    }
     return session.socket.write(buildTemplate(226));
 }
+
 
 function fType2Str(fName: string, fType: fType) {
     let str = '';

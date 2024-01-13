@@ -15,7 +15,7 @@ const Route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     // RETR: require('./method/RETR').execute,
     // REST: require('./method/REST').execute,
     // PORT: require('./method/PORT').execute,
-    // LIST: require('./method/LIST').execute,
+    LIST: require('./method/MLSD').execute,
     // NLST: require('./method/NLST').execute,
     MLSD: require('./method/MLSD').execute,
     // QUIT: require('./method/QUIT').execute,
