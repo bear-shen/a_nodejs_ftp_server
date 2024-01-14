@@ -2,6 +2,7 @@ import {SessionDef} from "../types";
 import {basename, buildTemplate, dirname, ltrimSlash, rtrimSlash, syncWritePassive} from "../Lib";
 import * as fs from "node:fs/promises";
 import {Stats} from "fs";
+import Config from "../Config";
 
 /**
  * 如果整个目录已成功传输，则接受代码为 226 的 LIST 或 NLST 请求；
@@ -18,8 +19,8 @@ type fType = {
 };
 
 export async function execute(session: SessionDef, buffer: Buffer) {
-    console.info(session);
-    return;
+    // console.info(session);
+    // return;
     if (!session.passive)
         return session.socket.write(buildTemplate(425));
     let withCDir = false;
@@ -28,7 +29,7 @@ export async function execute(session: SessionDef, buffer: Buffer) {
         withCDir = true;
         extPath = ltrimSlash(rtrimSlash(extPath));
     }
-    let curPath = session.curPath;
+    let curPath = Config.root + session.curPath;
     if (withCDir) {
         curPath = rtrimSlash(curPath) + '/' + extPath + '/';
     }
@@ -42,15 +43,19 @@ export async function execute(session: SessionDef, buffer: Buffer) {
     //
     let targetLs: [string, fType][] = [];
     //
+    console.info(curPath);
     const cDir = await fs.stat(curPath);
     targetLs.push([basename(curPath), stat2FType(cDir, 'c')]);
+    //
     let pPath = dirname(curPath);
+    console.info(pPath);
     if (pPath.length) {
         const pDir = await fs.stat(pPath);
         targetLs.push([basename(pPath), stat2FType(pDir, 'p')]);
     }
     //
     const ls = await fs.readdir(curPath);
+    console.info(ls);
     for (let i = 0; i < ls.length; i++) {
         const f = ls[i];
         const fPath = curPath + f;

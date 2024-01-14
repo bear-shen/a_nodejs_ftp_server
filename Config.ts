@@ -1,5 +1,5 @@
 const Config = {
-    root: '/home',
+    root: 'E:/t',
     account: [
         {name: 'loli', password: 'con'},
     ],
@@ -22,6 +22,9 @@ const Config = {
         _550: '550 Permission denied.\r\n',
         _504: '504 Command not implemented for that parameter.\r\n',
         _425: '425 Can\'t open data connection.\r\n',
+        _215: '215 UNIX Type: I\r\n',
+        _211: '211 Features:\r\n{0}',
+        _202: '202 UTF8 mode is always enabled. No need to send this command.\r\n',
     } as { [key: string]: string },
 };
 
