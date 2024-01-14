@@ -1,4 +1,4 @@
-tcp.port==21||tcp.port==25||(tcp.srcport < 15000 and tcp.srcport>12000) ||(tcp.dstport < 15000 and tcp.dstport>12000)
+tcp.port==21||tcp.port==2121||(tcp.srcport < 15000 and tcp.srcport>12000) ||(tcp.dstport < 15000 and tcp.dstport>12000)
 
 ```text
 fillzilla一直识别为ascii，需要UTF8支持

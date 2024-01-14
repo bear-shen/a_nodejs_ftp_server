@@ -3,5 +3,12 @@ import {buildTemplate} from "../Lib";
 import Route from "../Route";
 
 export async function execute(session: SessionDef, buffer: Buffer) {
-    return session.socket.write(buildTemplate(211,Object.keys(Route).join('\r\n')+'\r\n'));
+    const features = Object.keys(Route);
+    features.push('UTF8');
+    features.push('MLST type*;size*;modify*;');
+    return session.socket.write(
+        buildTemplate(211,
+            features.join('\r\n')
+            + '\r\n211 End\r\n'
+        ));
 }

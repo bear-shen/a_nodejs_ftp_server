@@ -67,7 +67,11 @@ export async function execute(session: SessionDef, buffer: Buffer) {
         // session.passive.socket.uncork()
         await syncWritePassive(session.passive.socket, fType2Str(f[0], f[1]) + "\r\n");
     }
-    return session.socket.write(buildTemplate(226));
+    session.passive.socket.end(() => {
+        session.passive.server.close(() => {
+            session.socket.write(buildTemplate(226));
+        })
+    });
 }
 
 
