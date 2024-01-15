@@ -16,5 +16,6 @@ type SessionDef = {
         socket?: Socket,
     } | null,
     curPath: string,
+    ext_rnfr?: string,
     // curNode: number,
 };

@@ -1,6 +1,8 @@
 import {SessionDef} from "./types";
 import Config from "./Config";
 import {Server, Socket} from "net";
+import {ReadStream, WriteStream} from "fs";
+import fs from "node:fs/promises";
 
 const net = require("node:net");
 
@@ -61,7 +63,7 @@ function basename(str: string) {
     return str.substring(offset + 1, str.length);
 }
 
-function syncWrite(socket: Socket, str: string) {
+function syncWriteSocket(socket: Socket, str: string) {
     if (!socket) return;
     return new Promise(resolve => {
         socket.write(
@@ -104,15 +106,27 @@ function createPasvServer(session: SessionDef) {
             socket.on("connect", async () => {
                 console.info('PASV:socket:connect');
             });
-            socket.on("data", async (buffer: Buffer) => {
-                console.info('PASV:socket:data');
-            });
+            // socket.on("data", async (buffer: Buffer) => {
+            //     console.info('PASV:socket:data');
+            // });
         });
         server.listen(validPort, Config.host, async () => {
             console.info('PASV:server.listeningListener', validPort);
             resolve(true);
         });
     });
+}
+
+function waitForPassiveSocket(session: SessionDef) {
+    return new Promise((resolve, reject) => {
+        if (session.passive.socket) return true;
+        let timer = setInterval(() => {
+            if (session.passive.socket) {
+                clearInterval(timer);
+                resolve(true);
+            }
+        }, 5);
+    })
 }
 
 /**
@@ -139,6 +153,54 @@ function isPortAvailable(port: number): Promise<boolean> {
     });
 }
 
+function readStream2Socket(socket: Socket, readStream: ReadStream) {
+    return new Promise(resolve => {
+        readStream.on('data', chunk =>
+            socket.write(chunk)
+        );
+        readStream.on('end', () => {
+            resolve(true);
+        })
+    });
+}
+
+function socket2writeStream(socket: Socket, writeStream: WriteStream) {
+    return new Promise(resolve => {
+        socket.on('data', chunk =>
+            writeStream.write(chunk)
+        );
+        socket.on('close', () => {
+            resolve(true);
+        })
+    });
+}
+
+async function fileExists(path: string) {
+    let ifExs = false;
+    try {
+        await fs.access(path);
+        ifExs = true;
+    } catch (e: any) {
+        ifExs = false;
+    }
+    return ifExs;
+}
+
+function getRelPath(session: SessionDef, fileName: string) {
+    const isAbsolutePath = fileName.indexOf('/') === 0;
+    let filePath = '';
+    if (isAbsolutePath) {
+        filePath = fileName;
+    } else {
+        filePath = rtrimSlash(session.curPath) + '/' + ltrimSlash(fileName);
+    }
+    return filePath;
+}
+
+function getAbsolutePath(relPath: string) {
+    return rtrimSlash(Config.root) + '/' + ltrimSlash(relPath);
+}
+
 export {
     login,
     buildTemplate,
@@ -146,6 +208,12 @@ export {
     rtrimSlash,
     dirname,
     basename,
-    syncWrite,
+    syncWriteSocket,
     createPasvServer,
+    readStream2Socket,
+    waitForPassiveSocket,
+    socket2writeStream,
+    fileExists,
+    getRelPath,
+    getAbsolutePath,
 };

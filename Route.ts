@@ -12,7 +12,7 @@ const Route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     XPWD: require('./method/PWD').execute,
     // CDUP: require('./method/CDUP').execute,
     PASV: require('./method/PASV').execute,
-    // RETR: require('./method/RETR').execute,
+    RETR: require('./method/RETR').execute,
     // REST: require('./method/REST').execute,
     // PORT: require('./method/PORT').execute,
     // LIST: require('./method/MLSD').execute,
@@ -25,15 +25,15 @@ const Route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     // STAT: require('./method/STAT').execute,
     // HELP: require('./method/HELP').execute,
     NOOP: require('./method/NOOP').execute,
-    // STOR: require('./method/STOR').execute,
+    STOR: require('./method/STOR').execute,
     // APPE: require('./method/APPE').execute,
     // STOU: require('./method/STOU').execute,
     // ALLO: require('./method/ALLO').execute,
     // MKD: require('./method/MKD').execute,
     // RMD: require('./method/RMD').execute,
-    // DELE: require('./method/DELE').execute,
-    // RNFR: require('./method/RNFR').execute,
-    // RNTO: require('./method/RNTO').execute,
+    DELE: require('./method/DELE').execute,
+    RNFR: require('./method/RNFR').execute,
+    RNTO: require('./method/RNTO').execute,
 };
 
 export default Route;
