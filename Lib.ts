@@ -158,7 +158,7 @@ function readStream2Socket(socket: Socket, readStream: ReadStream) {
         readStream.on('data', chunk =>
             socket.write(chunk)
         );
-        readStream.on('end', () => {
+        readStream.on('close', () => {
             resolve(true);
         })
     });
