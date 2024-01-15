@@ -7,7 +7,7 @@ const Route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     TYPE: require('./method/TYPE').execute,
     // STRU: require('./method/STRU').execute,
     // MODE: require('./method/MODE').execute,
-    // CWD: require('./method/CWD').execute,
+    CWD: require('./method/CWD').execute,
     PWD: require('./method/PWD').execute,
     XPWD: require('./method/PWD').execute,
     // CDUP: require('./method/CDUP').execute,

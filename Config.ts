@@ -9,8 +9,8 @@ const Config = {
     pasv_max: 15000,
     messageTemplate: {
         //https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes
-        // _220: '220 A FTP Server\r\n',
-        _220: '220-FileZilla Server 1.4.0\r\n220 Please visit https://filezilla-project.org/\r\n',
+        _220: '220-A FTP Server\r\n220 Welcome\r\n',
+        // _220: '220-FileZilla Server 1.4.0\r\n220 Please visit https://filezilla-project.org/\r\n',
         _331: '331 Please, specify the password.\r\n',
         _430: '430 invalid username or password.\r\n',
         _230: '230 Login successful.\r\n',

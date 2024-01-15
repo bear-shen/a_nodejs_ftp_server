@@ -61,7 +61,7 @@ function basename(str: string) {
     return str.substring(offset + 1, str.length);
 }
 
-function syncWritePassive(socket: Socket, str: string) {
+function syncWrite(socket: Socket, str: string) {
     if (!socket) return;
     return new Promise(resolve => {
         socket.write(
@@ -73,14 +73,16 @@ function syncWritePassive(socket: Socket, str: string) {
 const pasvPortSet = new Set<number>;
 
 function createPasvServer(session: SessionDef) {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<any>(async (resolve, reject) => {
         if (session.passive) session.passive.server.close();
         let validPort = 0;
         for (let i = Config.pasv_min; i <= Config.pasv_max; i++) {
             if (pasvPortSet.has(i)) continue;
+            if (!await isPortAvailable(i)) continue;
             validPort = i;
             break;
         }
+        pasvPortSet.add(validPort);
         const server: Server = net.createServer({}, async (socket: Socket) => {
             console.info('PASV:server.createServer', validPort);
         });
@@ -113,6 +115,30 @@ function createPasvServer(session: SessionDef) {
     });
 }
 
+/**
+ * @see https://github.com/colxi/is-port-available/blob/master/index.js
+ * */
+function isPortAvailable(port: number): Promise<boolean> {
+    return new Promise(resolve => {
+        // if port is not a number or is not an integet or is out of range block
+        if (isNaN(port) || port < 0 || port > 65536) {
+            resolve(false);
+        }
+        const tester = net.createServer()
+            // catch errors, and resolve false
+            .once('error', (err: Error) => {
+                resolve(false);
+            })
+            // return true if succed
+            .once('listening', () =>
+                tester.once('close', () =>
+                    resolve(true)
+                ).close()
+            )
+            .listen(port);
+    });
+}
+
 export {
     login,
     buildTemplate,
@@ -120,6 +146,6 @@ export {
     rtrimSlash,
     dirname,
     basename,
-    syncWritePassive,
+    syncWrite,
     createPasvServer,
 };

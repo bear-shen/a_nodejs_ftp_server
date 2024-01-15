@@ -1,5 +1,5 @@
 import {SessionDef} from "../types";
-import {basename, buildTemplate, dirname, ltrimSlash, rtrimSlash, syncWritePassive} from "../Lib";
+import {basename, buildTemplate, dirname, ltrimSlash, rtrimSlash, syncWrite} from "../Lib";
 import * as fs from "node:fs/promises";
 import {Stats} from "fs";
 import Config from "../Config";
@@ -23,6 +23,7 @@ export async function execute(session: SessionDef, buffer: Buffer) {
     // return;
     if (!session.passive)
         return session.socket.write(buildTemplate(425));
+    await syncWrite(session.socket, buildTemplate(150));
     let withCDir = false;
     let extPath = buffer.toString();
     if (extPath.length) {
@@ -65,12 +66,10 @@ export async function execute(session: SessionDef, buffer: Buffer) {
     for (let i = 0; i < targetLs.length; i++) {
         const f = targetLs[i];
         // session.passive.socket.uncork()
-        await syncWritePassive(session.passive.socket, fType2Str(f[0], f[1]) + "\r\n");
+        await syncWrite(session.passive.socket, fType2Str(f[0], f[1]) + "\r\n");
     }
     session.passive.socket.end(() => {
-        session.passive.server.close(() => {
-            session.socket.write(buildTemplate(226));
-        })
+        session.socket.write(buildTemplate(226));
     });
 }
 
