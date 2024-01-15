@@ -76,7 +76,7 @@ const pasvPortSet = new Set<number>;
 
 function createPasvServer(session: SessionDef) {
     return new Promise<any>(async (resolve, reject) => {
-        if (session.passive) session.passive.server.close();
+        if (session.passive && session.passive.server) session.passive.server.close();
         let validPort = 0;
         for (let i = Config.pasv_min; i <= Config.pasv_max; i++) {
             if (pasvPortSet.has(i)) continue;
@@ -119,9 +119,9 @@ function createPasvServer(session: SessionDef) {
 
 function waitForPassiveSocket(session: SessionDef) {
     return new Promise((resolve, reject) => {
-        if (session.passive.socket) return true;
+        if (session.passive && session.passive.socket) return true;
         let timer = setInterval(() => {
-            if (session.passive.socket) {
+            if (session.passive && session.passive.socket) {
                 clearInterval(timer);
                 resolve(true);
             }

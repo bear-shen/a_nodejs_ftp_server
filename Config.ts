@@ -28,6 +28,7 @@ const Config = {
         _202: '202 UTF8 mode is always enabled. No need to send this command.\r\n',
         _350: '350 File Exists, ready for destination.\r\n',
         _451: '451 Requested action aborted. Local error in processing.\r\n',
+        _452: '452 Requested action not taken. Insufficient storage space in system. File unavailable.\r\n',
         _503: '503 Bad sequence of commands.\r\n',
     } as { [key: string]: string },
 };
