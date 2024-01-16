@@ -18,9 +18,6 @@ export async function execute(session: SessionDef, buffer: Buffer) {
     await socket2writeStream(session.passive.socket, ws);
     ws.close();
     if (session.passive && session.passive.socket)
-        session.passive.socket.end(() => {
-            session.socket.write(buildTemplate(226));
-        });
-    else
-        session.socket.write(buildTemplate(226));
+        session.passive.socket.end();
+    session.socket.write(buildTemplate(226));
 }

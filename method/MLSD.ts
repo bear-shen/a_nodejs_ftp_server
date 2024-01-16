@@ -57,7 +57,7 @@ export async function execute(session: SessionDef, buffer: Buffer) {
     for (let i = 0; i < ls.length; i++) {
         const f = ls[i];
         const fPath = curPath + '/' + f;
-        console.info(fPath);
+        // console.info(fPath);
         const fStat = await fs.stat(fPath);
         targetLs.push([f, stat2FType(fStat)]);
     }

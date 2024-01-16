@@ -52,14 +52,14 @@ function rtrimSlash(str: string) {
 function dirname(str: string) {
     str = rtrimSlash(str);
     let offset = str.lastIndexOf('/');
-    if (offset === 0 || offset === -1) return str;
+    if (offset === -1) return str;
     return str.substring(0, offset);
 }
 
 function basename(str: string) {
     str = rtrimSlash(str);
     let offset = str.lastIndexOf('/');
-    if (offset === 0 || offset === -1) return str;
+    if (offset === -1) return str;
     return str.substring(offset + 1, str.length);
 }
 
@@ -121,8 +121,10 @@ function createPasvServer(session: SessionDef) {
 
 function waitForPassiveSocket(session: SessionDef) {
     return new Promise((resolve, reject) => {
-        if (session.passive && session.passive.socket) return true;
+        // console.info(session.passive?.socket);
+        if (session.passive && session.passive.socket) return resolve(true);
         let timer = setInterval(() => {
+            // console.info(session.passive?.socket);
             if (session.passive && session.passive.socket) {
                 clearInterval(timer);
                 resolve(true);
@@ -158,11 +160,13 @@ function isPortAvailable(port: number): Promise<boolean> {
 function readStream2Socket(socket: Socket, readStream: ReadStream) {
     return new Promise(resolve => {
         readStream.on('data', chunk => {
+                // console.info('rs:data')
                 // console.info(chunk.toString());
                 socket.write(chunk);
             }
         );
         readStream.on('close', () => {
+            // console.info('rs:close')
             resolve(true);
         })
     });
