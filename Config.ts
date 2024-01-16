@@ -1,8 +1,24 @@
+import * as tls from "tls";
+import {ConnectionOptions} from "tls";
+import fs from "node:fs";
+
 const Config = {
     root: 'E:/t',
     account: [
         {name: 'loli', password: 'con'},
     ],
+    tls: true,
+    tlsConfig: {
+        key: fs.readFileSync(`${__dirname}/../cert/cirno_ftp.key`),
+        cert: fs.readFileSync(`${__dirname}/../cert/cirno_ftp.crt`),
+        ca: [fs.readFileSync(`${__dirname}/../cert/rootCA.crt`)],
+        // This is necessary only if using client certificate authentication.
+        requestCert: false,
+        rejectUnauthorized: false,
+        checkServerIdentity: () => {
+            return null;
+        },
+    } as tls.TlsOptions & ConnectionOptions,
     port: 2121,
     host: '0.0.0.0',
     pasv_min: 12000,
@@ -30,6 +46,7 @@ const Config = {
         _451: '451 Requested action aborted. Local error in processing.\r\n',
         _452: '452 Requested action not taken. Insufficient storage space in system. File unavailable.\r\n',
         _503: '503 Bad sequence of commands.\r\n',
+        _234: '234 Using authentication type TLS.\r\n',
     } as { [key: string]: string },
 };
 
