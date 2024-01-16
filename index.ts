@@ -29,7 +29,8 @@ server.on('error', async (err: Error) => {
 server.on('connection', async (socket: Socket) => {
     console.info('server:connection');
     const session = SessionStore.build(socket);
-    // socket.setEncoding('utf-8');
+    //@see https://nodejs.org/docs/latest/api/buffer.html
+    // socket.setEncoding('binary');
     socket.write(buildTemplate(220));
     socket.on("close", async (hadError: boolean) => {
         console.info('socket:close');

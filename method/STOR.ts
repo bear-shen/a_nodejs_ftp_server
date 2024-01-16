@@ -11,7 +11,7 @@ export async function execute(session: SessionDef, buffer: Buffer) {
     const ws = fsNp.createWriteStream(
         getAbsolutePath(filePath), {
             autoClose: true,
-            encoding: 'binary',
+            // encoding: 'binary',
             flags: 'w+',
             mode: 0o666,
         });

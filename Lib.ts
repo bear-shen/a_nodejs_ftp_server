@@ -96,6 +96,8 @@ function createPasvServer(session: SessionDef) {
             console.info('PASV:server.connection');
             session.passive.socket = socket;
             socket.setNoDelay(true);
+            //@see https://nodejs.org/docs/latest/api/buffer.html
+            // socket.setEncoding('binary');
             socket.on("close", async (hadError: boolean) => {
                 console.info('PASV:socket:close');
                 session.passive.server.close((err) => {
@@ -155,8 +157,10 @@ function isPortAvailable(port: number): Promise<boolean> {
 
 function readStream2Socket(socket: Socket, readStream: ReadStream) {
     return new Promise(resolve => {
-        readStream.on('data', chunk =>
-            socket.write(chunk)
+        readStream.on('data', chunk => {
+                // console.info(chunk.toString());
+                socket.write(chunk);
+            }
         );
         readStream.on('close', () => {
             resolve(true);

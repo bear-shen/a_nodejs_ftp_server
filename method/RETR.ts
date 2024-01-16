@@ -8,10 +8,12 @@ export async function execute(session: SessionDef, buffer: Buffer) {
     const filePath = getRelPath(session, buffer.toString());
     const rs = fsNp.createReadStream(
         getAbsolutePath(filePath), {
+            flags: 'r',
             autoClose: true,
             // start: 0,
             // end: 0,
-            encoding: 'binary',
+            // encoding: 'utf8',
+            // highWaterMark: 11,
         });
     session.passive.socket.setNoDelay(false);
     await readStream2Socket(session.passive.socket, rs);
