@@ -12,9 +12,8 @@ const Config = {
         key: fs.readFileSync(`${__dirname}/../cert/cirno_ftp.key`),
         cert: fs.readFileSync(`${__dirname}/../cert/cirno_ftp.crt`),
         ca: [fs.readFileSync(`${__dirname}/../cert/rootCA.crt`)],
-        // This is necessary only if using client certificate authentication.
-        requestCert: false,
-        rejectUnauthorized: false,
+        isServer: true,
+        // rejectUnauthorized: false,
         checkServerIdentity: () => {
             return null;
         },

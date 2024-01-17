@@ -3,7 +3,8 @@ import {SessionDef} from "./types";
 import Route from "./Route";
 import SessionStore from "./SessionStore";
 import Config from "./Config";
-import {buildTemplate} from "./Lib";
+import {buildTemplate, dataProcessor} from "./Lib";
+import * as tls from "tls";
 
 const net = require("node:net");
 
@@ -41,29 +42,7 @@ server.on('connection', async (socket: Socket) => {
     });
     socket.on("data", async (buffer: Buffer) => {
         console.info('socket:data');
-        if (typeof buffer == 'string') {
-            buffer = Buffer.from(buffer);
-        }
-        // console.info(data.toString());
-        let methodName = '';
-        let st = 0;
-        // console.info(buffer.toString());
-        // console.info(typeof buffer);
-        // console.info(buffer.length);
-        for (let i = 0; i < 5; i++) {
-            let char = buffer.readInt8(i);
-            st = i;
-            if (char == 32 || char == 0x0d || char == 0x0a) break;
-            methodName += String.fromCharCode(char);
-        }
-        console.info(methodName);
-        if (!Route[methodName]) {
-            session.socket.write(buildTemplate(504));
-            return;
-        }
-        // console.info(methodName, methodName.length);
-        const sBuffer = buffer.subarray(methodName.length + 1, buffer.length - 2);
-        Route[methodName](session, sBuffer);
+        dataProcessor(session,buffer);
     });
 });
 server.on('drop', async (data?: DropArgument) => {

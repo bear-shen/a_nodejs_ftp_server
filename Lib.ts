@@ -3,8 +3,34 @@ import Config from "./Config";
 import {Server, Socket} from "net";
 import {ReadStream, WriteStream} from "fs";
 import fs from "node:fs/promises";
+import net from "node:net";
+import Route from "./Route";
 
-const net = require("node:net");
+function dataProcessor(session: SessionDef, buffer: Buffer) {
+    if (typeof buffer == 'string') {
+        buffer = Buffer.from(buffer);
+    }
+    // console.info(data.toString());
+    let methodName = '';
+    let st = 0;
+    // console.info(buffer.toString());
+    // console.info(typeof buffer);
+    // console.info(buffer.length);
+    for (let i = 0; i < 5; i++) {
+        let char = buffer.readInt8(i);
+        st = i;
+        if (char == 32 || char == 0x0d || char == 0x0a) break;
+        methodName += String.fromCharCode(char);
+    }
+    console.info(methodName);
+    if (!Route[methodName]) {
+        session.socket.write(buildTemplate(504));
+        return;
+    }
+    // console.info(methodName, methodName.length);
+    const sBuffer = buffer.subarray(methodName.length + 1, buffer.length - 2);
+    Route[methodName](session, sBuffer);
+}
 
 async function login(session: SessionDef) {
     const name = session.user;
@@ -94,7 +120,10 @@ function createPasvServer(session: SessionDef) {
         };
         server.on('connection', async (socket: Socket) => {
             console.info('PASV:server.connection');
-            session.passive.socket = socket;
+            // console.info(session.tls);
+            // if (session.tls) {
+            //     socket = new tls.TLSSocket(socket, Config.tlsConfig);
+            // }
             socket.setNoDelay(true);
             //@see https://nodejs.org/docs/latest/api/buffer.html
             // socket.setEncoding('binary');
@@ -111,6 +140,10 @@ function createPasvServer(session: SessionDef) {
             // socket.on("data", async (buffer: Buffer) => {
             //     console.info('PASV:socket:data');
             // });
+            socket.on('close', () => {
+                console.info('PASV:socket:close');
+            });
+            session.passive.socket = socket;
         });
         server.listen(validPort, Config.host, async () => {
             console.info('PASV:server.listeningListener', validPort);
@@ -142,7 +175,7 @@ function isPortAvailable(port: number): Promise<boolean> {
         if (isNaN(port) || port < 0 || port > 65536) {
             resolve(false);
         }
-        const tester = net.createServer()
+        const tester: Server = net.createServer()
             // catch errors, and resolve false
             .once('error', (err: Error) => {
                 resolve(false);
@@ -174,8 +207,10 @@ function readStream2Socket(socket: Socket, readStream: ReadStream) {
 
 function socket2writeStream(socket: Socket, writeStream: WriteStream) {
     return new Promise(resolve => {
-        socket.on('data', chunk =>
-            writeStream.write(chunk)
+        socket.on('data', chunk => {
+                // console.info(chunk.toString());
+                writeStream.write(chunk);
+            }
         );
         socket.on('close', () => {
             resolve(true);
@@ -210,6 +245,7 @@ function getAbsolutePath(relPath: string) {
 }
 
 export {
+    dataProcessor,
     login,
     buildTemplate,
     ltrimSlash,

@@ -20,6 +20,7 @@ export default {
             socket: socket,
             mode: 'I',
             time: (new Date()).valueOf(),
+            tls: false,
             passive: null,
             curPath: '/',
             // curNode: 0,
