@@ -3,3 +3,4 @@ node_modules
 zzz*
 .idea
 .git
+/cert/tls.dbg

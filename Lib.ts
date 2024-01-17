@@ -5,6 +5,7 @@ import {ReadStream, WriteStream} from "fs";
 import fs from "node:fs/promises";
 import net from "node:net";
 import Route from "./Route";
+import * as tls from "tls";
 
 function dataProcessor(session: SessionDef, buffer: Buffer) {
     if (typeof buffer == 'string') {
@@ -100,6 +101,8 @@ function syncWriteSocket(socket: Socket, str: string) {
 
 const pasvPortSet = new Set<number>;
 
+const sessionStore = new Map<Buffer, Buffer>();
+
 function createPasvServer(session: SessionDef) {
     return new Promise<any>(async (resolve, reject) => {
         if (session.passive && session.passive.server) session.passive.server.close();
@@ -111,15 +114,24 @@ function createPasvServer(session: SessionDef) {
             break;
         }
         pasvPortSet.add(validPort);
-        const server: Server = net.createServer({}, async (socket: Socket) => {
+        console.info(session.tls);
+        const server: Server = session.tls ? tls.createServer(Config.tlsConfig, async (socket: Socket) => {
+            console.info('PASV:server.createServer', validPort);
+        }) : net.createServer({}, async (socket: Socket) => {
             console.info('PASV:server.createServer', validPort);
         });
+        // const server: Server = net.createServer({}, async (socket: Socket) => {
+        //     console.info('PASV:server.createServer', validPort);
+        // });
         session.passive = {
             port: validPort,
             server: server,
         };
-        server.on('connection', async (socket: Socket) => {
+        // server.on('connection', async (socket: Socket) => {
+        server.on(session.tls ? 'secureConnection' : 'connection', async (socket: Socket) => {
             console.info('PASV:server.connection');
+            // socket = new tls.TLSSocket(session.socket, Config.tlsConfig);
+
             // console.info(session.tls);
             // if (session.tls) {
             //     socket = new tls.TLSSocket(socket, Config.tlsConfig);
@@ -128,7 +140,8 @@ function createPasvServer(session: SessionDef) {
             //@see https://nodejs.org/docs/latest/api/buffer.html
             // socket.setEncoding('binary');
             socket.on("close", async (hadError: boolean) => {
-                console.info('PASV:socket:close');
+                console.info('PASV:socket:close', hadError);
+                // console.info(new Error().stack);
                 session.passive.server.close((err) => {
                     pasvPortSet.delete(session.passive.port);
                     session.passive = null;
@@ -140,11 +153,37 @@ function createPasvServer(session: SessionDef) {
             // socket.on("data", async (buffer: Buffer) => {
             //     console.info('PASV:socket:data');
             // });
-            socket.on('close', () => {
-                console.info('PASV:socket:close');
-            });
             session.passive.socket = socket;
         });
+        //注意如果用resumeSession需要把回调写全，不然没server hello
+        // server.on('keylog', (...args) => {
+        //     console.info('PASV:server:keylog', args ? args[0] : null);
+        // })
+        server.on('newSession', (id: Buffer, data: Buffer, cb: () => any) => {
+            console.info('PASV:server:newSession');
+            sessionStore.set(id, data);
+            cb();
+            // tls.connect(Object.assign({
+            //     session: args[0]
+            // }, Config.tlsConfig));
+        })
+        // server.on('OCSPRequest', (...args) => {
+        //     console.info('PASV:server:OCSPRequest', args ? args[0] : null);
+        // })
+        // server.on('OCSPResponse', (...args) => {
+        //     console.info('PASV:server:OCSPResponse', args ? args[0] : null);
+        // })
+        server.on('resumeSession', (id: Buffer, cb: (err: Error, data: Buffer) => any) => {
+            console.info('PASV:server:resumeSession');
+            // console.info(args[0].toString());
+            cb(null, sessionStore.get(id) || null);
+        })
+        // server.on('secureConnection', (...args) => {
+        // console.info('PASV:server:secureConnection', args ? args[0] : null);
+        // })
+        server.on('tlsClientError', (...args) => {
+            console.info('PASV:server:tlsClientError', args ? args[0] : null);
+        })
         server.listen(validPort, Config.host, async () => {
             console.info('PASV:server.listeningListener', validPort);
             resolve(true);

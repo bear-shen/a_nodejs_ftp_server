@@ -22,6 +22,8 @@ const Route: { [key: string]: (session: SessionDef, buffer: Buffer) => any } = {
     RNTO: require('./method/RNTO').execute,
     CDUP: require('./method/CDUP').execute,
     AUTH: require('./method/AUTH').execute,
+    PBSZ: require('./method/PBSZ').execute,
+    PROT: require('./method/PROT').execute,
     // APPE: require('./method/APPE').execute,
     // STOU: require('./method/STOU').execute,
     // ALLO: require('./method/ALLO').execute,

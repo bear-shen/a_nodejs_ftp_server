@@ -1,6 +1,5 @@
 import {SessionDef} from "../types";
 import {buildTemplate, dataProcessor} from "../Lib";
-import config from "../Config";
 import Config from "../Config";
 import * as tls from "tls";
 
@@ -10,7 +9,7 @@ import * as tls from "tls";
  * */
 export async function execute(session: SessionDef, buffer: Buffer) {
     const crypto = buffer.toString();
-    if (crypto != 'TLS' || !config.tls) return session.socket.write(buildTemplate(504));
+    if (crypto != 'TLS' || !Config.tls) return session.socket.write(buildTemplate(504));
     session.tls = true;
     session.socket.write(buildTemplate(234));
     session.socket = new tls.TLSSocket(session.socket, Config.tlsConfig);

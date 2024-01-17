@@ -13,6 +13,8 @@ const Config = {
         cert: fs.readFileSync(`${__dirname}/../cert/cirno_ftp.crt`),
         ca: [fs.readFileSync(`${__dirname}/../cert/rootCA.crt`)],
         isServer: true,
+        // requestCert: true,
+        // requestOCSP: true,
         // rejectUnauthorized: false,
         checkServerIdentity: () => {
             return null;
